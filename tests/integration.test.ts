@@ -22,7 +22,6 @@ const write = (agent: any, method: string, url: string, body: unknown) =>
   agent[method](url).set('X-Requested-With', 'CeylonEats').send(body);
 let restaurantId: number, dishId: number;
 let signUps = 0;
-// Registers a throwaway customer and returns an agent already holding its session.
 async function signUp(label: string) {
   const agent = request.agent(app);
   const response = await write(agent, 'post', '/api/auth/register', {
@@ -152,8 +151,6 @@ test('Review validation, ownership and dish/restaurant integrity', async () => {
 test('Pending reviews are private; approval updates restaurant and dish ratings; rejection reverses both', async () => {
   const before = (await request(app).get(`/api/restaurants/${restaurantId}`)).body;
   const body = 'ආහාර රසවත්. உணவு சுவையாக இருந்தது. Excellent meal!';
-  // A fresh account: every seeded customer already reviewed this dish, and one review per
-  // subject per author is now enforced.
   const reviewer = await signUp('rating-maths');
   const posted = await write(reviewer, 'post', '/api/reviews', {
     restaurant_id: restaurantId,
@@ -272,12 +269,10 @@ test('One review per dish and per restaurant, with resubmission after a rejectio
   };
   const dish = await write(reviewer, 'post', '/api/reviews', { ...base, menu_item_id: dishId });
   assert.equal(dish.status, 201);
-  // A second review of the same dish is refused, pending or approved.
   assert.equal(
     (await write(reviewer, 'post', '/api/reviews', { ...base, menu_item_id: dishId })).status,
     409,
   );
-  // The restaurant as a whole is a separate subject, and so is another dish.
   const overall = await write(reviewer, 'post', '/api/reviews', base);
   assert.equal(overall.status, 201);
   assert.equal((await write(reviewer, 'post', '/api/reviews', base)).status, 409);
@@ -288,7 +283,6 @@ test('One review per dish and per restaurant, with resubmission after a rejectio
     (await write(reviewer, 'post', '/api/reviews', { ...base, menu_item_id: otherDish.id })).status,
     201,
   );
-  // A rejected review frees the subject so the author can rewrite it.
   assert.equal(
     (
       await write(moderator, 'patch', `/api/admin/postings/${dish.body.id}`, {

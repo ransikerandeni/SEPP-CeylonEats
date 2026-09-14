@@ -24,8 +24,7 @@ const options = () => ({
 });
 export async function setSession(res: Response, userId: number) {
   const token = randomBytes(32).toString('hex');
-  // Expired rows are never read again, so clear them out here rather than letting the
-  // table grow forever. The expires_at index keeps this cheap on every sign-in.
+  // Expired rows are never read again; clear them out while we are writing anyway.
   await query('DELETE FROM sessions WHERE expires_at<now()');
   await query(
     "INSERT INTO sessions(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval '7 days')",

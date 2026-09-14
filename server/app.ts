@@ -31,8 +31,6 @@ app.use(
   }),
 );
 app.use(express.json({ limit: '32kb' }), cookieParser());
-// Every limiter answers with our own JSON envelope so the client shows the real message
-// instead of the library's plain-text default.
 const tooMany = { error: 'Too many requests. Please wait a moment and try again.' };
 app.use(
   '/api',
@@ -64,10 +62,7 @@ const authLimit = rateLimit({
   standardHeaders: 'draft-8',
   legacyHeaders: false,
 });
-// Registration is the one endpoint that cannot hide whether an address is already in use:
-// refusing a duplicate says so, and there is no verification email here to refuse quietly.
-// A tighter budget than the shared auth limiter keeps that disclosure from being harvested
-// in bulk, and keeps probing registration from exhausting the sign-in allowance.
+// Refusing a duplicate address makes registration enumerable, so keep the budget tight.
 const registerLimit = rateLimit({
   windowMs: 60 * 60000,
   limit: 5,
@@ -227,8 +222,6 @@ app.post('/api/reviews', requireUser, async (req, res) => {
     .rows[0];
   if (own.owner_id === req.user!.id)
     return res.status(403).json({ error: 'You cannot review your own restaurant.' });
-  // One review per subject per author. The partial unique index is the real guarantee;
-  // this check exists to answer with a message the reader can act on.
   if (
     (
       await query(

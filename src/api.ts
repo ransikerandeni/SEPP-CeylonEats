@@ -8,8 +8,7 @@ export async function api<T>(url: string, options: RequestInit = {}): Promise<T>
       ...options.headers,
     },
   });
-  // Not every response is ours: rate limiters and proxies answer in plain text or HTML,
-  // and parsing those as JSON would replace the real message with a parser error.
+  // Rate limiters and proxies reply in plain text, so only parse what claims to be JSON.
   const isJson = (response.headers.get('Content-Type') || '').includes('application/json');
   const result = isJson ? await response.json() : null;
   if (!response.ok)
