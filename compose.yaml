@@ -2,16 +2,16 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: lanka
+      POSTGRES_USER: ceylon
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-      POSTGRES_DB: lanka_table
+      POSTGRES_DB: ceylon_eats
       POSTGRES_INITDB_ARGS: --encoding=UTF8
     ports:
-      - "127.0.0.1:55432:5432"
+      - '127.0.0.1:55432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lanka -d lanka_table"]
+      test: ['CMD-SHELL', 'pg_isready -U ceylon -d ceylon_eats']
       interval: 5s
       timeout: 5s
       retries: 10
