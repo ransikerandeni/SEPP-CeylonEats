@@ -1,0 +1,53 @@
+digraph DFD1 {
+  graph [rankdir=TB, fontname=Helvetica, labelloc=t, fontsize=20, label="Ceylon Eats — DFD Level 1\n ", pad=0.4, nodesep=0.55, ranksep=0.9, dpi=150, splines=true];
+  node [fontname=Helvetica, fontsize=11];
+  edge [fontname=Helvetica, fontsize=10, color="#444444"];
+  // external entities
+  node [shape=box, style=filled, fillcolor="#DCE6F7", color="#2F5597", width=1.6];
+  Guest [label="Guest /\nCustomer"]; Owner [label="Restaurant\nRepresentative"]; Mod [label="Moderator"]; Admin [label="Administrator"];
+  // processes (Gane–Sarson rounded)
+  node [shape=box, style="rounded,filled", fillcolor="#FFF1D6", color="#C77700", width=2.0, height=0.9];
+  P1 [label="1.0\nManage Accounts\n& Sessions"];
+  P2 [label="2.0\nSearch & Browse\nCatalog"];
+  P3 [label="3.0\nSubmit Reviews,\nComments & Responses"];
+  P4 [label="4.0\nModerate\nPostings"];
+  P5 [label="5.0\nManage Restaurants\n& Menu"];
+  P6 [label="6.0\nCalculate Ratings,\nPrice Bands & Rank"];
+  // data stores (open-ended)
+  node [shape=record, style=filled, fillcolor="#F2F2F2", color="#555555", width=2.0, height=0.4, fontsize=10];
+  D1 [label="D1 | Users"]; D2 [label="D2 | Sessions"]; D3 [label="D3 | Restaurants"];
+  D4 [label="D4 | Menu Items & Categories"]; D5 [label="D5 | Postings"]; D6 [label="D6 | Audit Log"];
+
+  Guest -> P1 [label="register / login details"];
+  P1 -> Guest [label="session cookie"];
+  P1 -> D1 [label="new user"]; D1 -> P1 [label="password hash, role"];
+  P1 -> D2 [label="session token hash"]; D2 -> P1 [label="valid session"];
+
+  Guest -> P2 [label="search, filters, sort"];
+  P2 -> Guest [label="results, details"];
+  D3 -> P2 [label="restaurant data"]; D4 -> P2 [label="dishes, prices"];
+  P6 -> P2 [label="ratings, price band, rank"];
+
+  Guest -> P3 [label="review / comment"];
+  Owner -> P3 [label="company response"];
+  P3 -> Guest [label="pending status,\nmy contributions"];
+  D2 -> P3 [label="authenticated user"];
+  D3 -> P3 [label="ownership check"];
+  P3 -> D5 [label="pending posting"];
+  D5 -> P3 [label="own postings"];
+
+  D5 -> P4 [label="pending queue"];
+  P4 -> Mod [label="queue"]; Mod -> P4 [label="decision + reason"];
+  P4 -> D5 [label="status update"];
+  P4 -> D6 [label="moderation event"];
+
+  Admin -> P5 [label="restaurant / menu data"];
+  P5 -> Admin [label="confirmation"];
+  P5 -> D3 [label="restaurant record"];
+  P5 -> D4 [label="menu item, price"];
+  P5 -> D6 [label="catalog change event"];
+  D1 -> P5 [label="owner accounts"];
+
+  D5 -> P6 [label="approved reviews"];
+  D4 -> P6 [label="menu prices"];
+}

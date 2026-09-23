@@ -1,0 +1,131 @@
+@startuml
+!include common.iuml
+title Ceylon Eats — Class Diagram (Domain Model)
+skinparam class {
+  BackgroundColor #F4F8FF
+  BorderColor #2F5597
+  HeaderBackgroundColor #DCE6F7
+}
+hide circle
+enum Role {
+  customer
+  owner
+  moderator
+  admin
+}
+enum City {
+  Colombo
+  Kandy
+  Galle
+}
+enum PostingKind {
+  review
+  comment
+  response
+}
+enum PostingStatus {
+  pending
+  approved
+  rejected
+}
+enum PriceBand {
+  unpriced
+  budget
+  mid
+  premium
+}
+
+class User {
+  +id : int
+  +name : String
+  +email : String {unique}
+  -passwordHash : String
+  +role : Role
+  +createdAt : DateTime
+  +register()
+  +login()
+  +logout()
+}
+class Session {
+  -tokenHash : String {PK}
+  +expiresAt : DateTime
+  +isValid() : bool
+}
+class Restaurant {
+  +id : int
+  +name : String
+  +city : City
+  +address : String
+  +description : String
+  +imageUrl : String
+  +createdAt : DateTime
+  +averagePrice() : Decimal
+  +priceBand() : PriceBand
+  +rating() : float
+  +rankScore() : float
+}
+class Category {
+  +id : int
+  +name : String
+  +slug : String
+}
+class MenuItem {
+  +id : int
+  +name : String
+  +nameSi : String
+  +nameTa : String
+  +description : String
+  {field} +price : Decimal(10,2)
+  +imageUrl : String
+  +vegetarian : bool
+  +vegan : bool
+  +halal : bool
+  +spice : int [0..3]
+  +rating() : float
+}
+abstract class Posting {
+  +id : int
+  +kind : PostingKind
+  +body : String [5..4000]
+  +status : PostingStatus
+  +moderationReason : String
+  +moderatedAt : DateTime
+  +createdAt : DateTime
+  +approve(moderator : User)
+  +reject(moderator : User, reason : String)
+}
+class Review {
+  +food : int [1..5]
+  +service : int [1..5]
+  +value : int [1..5]
+  +ambience : int [1..5]
+  +overall() : float
+}
+class Comment
+class Response
+class AuditLog {
+  +id : int
+  +action : String
+  +entityType : String
+  +entityId : int
+  +detail : JSON
+  +createdAt : DateTime
+}
+
+Posting <|-- Review
+Posting <|-- Comment
+Posting <|-- Response
+User "1" -- "0..*" Session : authenticates >
+User "0..1" -- "0..*" Restaurant : represents >
+Restaurant "1" *-- "0..*" MenuItem : offers >
+Category "1" -- "0..*" MenuItem : categorizes >
+User "1" -- "0..*" Posting : writes >
+User "0..1" -- "0..*" Posting : moderates >
+Restaurant "1" -- "0..*" Posting : receives >
+MenuItem "0..1" -- "0..*" Review : about <
+Review "1" o-- "0..*" Comment : replies
+Review "1" o-- "0..*" Response : replies
+User "0..1" -- "0..*" AuditLog : performs >
+User ..> Role
+Restaurant ..> City
+@enduml

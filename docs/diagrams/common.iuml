@@ -1,0 +1,6 @@
+skinparam defaultFontName Helvetica
+skinparam dpi 150
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #444444
+skinparam roundcorner 8

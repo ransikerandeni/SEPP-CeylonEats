@@ -1,0 +1,106 @@
+@startuml
+!include common.iuml
+title Ceylon Eats — Entity Relationship Diagram (PostgreSQL)
+hide circle
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #7A3E00
+  HeaderBackgroundColor #FBE3C6
+}
+entity "users" as users {
+  * **id** : SERIAL <<PK>>
+  --
+  * name : TEXT
+  * email : TEXT <<UQ>>
+  * password_hash : TEXT
+  * role : TEXT {customer|owner|moderator|admin}
+  * created_at : TIMESTAMPTZ
+}
+entity "sessions" as sessions {
+  * **token_hash** : TEXT <<PK>>
+  --
+  * user_id : INTEGER <<FK>>
+  * expires_at : TIMESTAMPTZ
+}
+entity "categories" as categories {
+  * **id** : SERIAL <<PK>>
+  --
+  * name : TEXT <<UQ>>
+  * slug : TEXT <<UQ>>
+}
+entity "restaurants" as restaurants {
+  * **id** : SERIAL <<PK>>
+  --
+  * name : TEXT
+  * city : TEXT {Colombo|Kandy|Galle}
+  * address : TEXT
+  * description : TEXT
+  * image_url : TEXT
+  owner_id : INTEGER <<FK>>
+  * created_at : TIMESTAMPTZ
+}
+entity "menu_items" as menu {
+  * **id** : SERIAL <<PK>>
+  --
+  * restaurant_id : INTEGER <<FK>>
+  * category_id : INTEGER <<FK>>
+  * name : TEXT
+  * name_si : TEXT
+  * name_ta : TEXT
+  * description : TEXT
+  * price : NUMERIC(10,2)
+  * image_url : TEXT
+  * vegetarian : BOOLEAN
+  * vegan : BOOLEAN
+  * halal : BOOLEAN
+  * spice : INTEGER (0–3)
+}
+entity "postings" as postings {
+  * **id** : SERIAL <<PK>>
+  --
+  * author_id : INTEGER <<FK>>
+  * restaurant_id : INTEGER <<FK>>
+  menu_item_id : INTEGER <<FK>>
+  parent_id : INTEGER <<FK>>
+  * kind : TEXT {review|comment|response}
+  * body : TEXT
+  food : INTEGER (1–5)
+  service : INTEGER (1–5)
+  value : INTEGER (1–5)
+  ambience : INTEGER (1–5)
+  * status : TEXT {pending|approved|rejected}
+  * moderation_reason : TEXT
+  moderated_by : INTEGER <<FK>>
+  moderated_at : TIMESTAMPTZ
+  * created_at : TIMESTAMPTZ
+}
+entity "audit_log" as audit {
+  * **id** : SERIAL <<PK>>
+  --
+  actor_id : INTEGER <<FK>>
+  * action : TEXT
+  * entity_type : TEXT
+  * entity_id : INTEGER
+  * detail : JSONB
+  * created_at : TIMESTAMPTZ
+}
+users ||--o{ sessions : "authenticates"
+users |o--o{ restaurants : "represents"
+restaurants ||--o{ menu : "offers"
+categories ||--o{ menu : "categorizes"
+users ||--o{ postings : "writes"
+users |o--o{ postings : "moderates"
+restaurants ||--o{ postings : "receives"
+menu |o--o{ postings : "reviewed in"
+postings |o--o{ postings : "has replies"
+users |o--o{ audit : "acts"
+legend right
+  **Keys & rules**
+  * = NOT NULL, PK = primary key, FK = foreign key, UQ = unique
+  (menu_item_id, restaurant_id) → menu_items(id, restaurant_id)
+  One review per author per dish/restaurant (partial unique index)
+  Vegan ⇒ vegetarian; 0 < price ≤ 1,000,000
+  Views: restaurant_stats, menu_stats (price band, rating, rank)
+endlegend
+@enduml

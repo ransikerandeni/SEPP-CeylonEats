@@ -1,0 +1,56 @@
+@startuml
+!include common.iuml
+title Ceylon Eats — Sequence Diagram: Submit and Moderate a Review
+skinparam sequence {
+  ParticipantBackgroundColor #EEF5EA
+  ParticipantBorderColor #3B7D23
+  LifeLineBorderColor #888888
+}
+actor Customer
+participant "React UI" as UI
+participant "Express API" as API
+participant "Auth\nMiddleware" as Auth
+participant "Zod\nValidation" as Val
+database PostgreSQL as DB
+actor Moderator
+
+Customer -> UI : Fill review form\n(4 ratings, text, optional dish)
+UI -> API : POST /api/reviews\n(session cookie, X-Requested-With)
+API -> Auth : requireUser()
+Auth -> DB : SELECT user by session token hash
+DB --> Auth : user row
+alt not signed in
+  Auth --> UI : 401 Please sign in
+else signed in
+  API -> Val : validate payload
+  alt invalid
+    Val --> UI : 400 validation error
+  else valid
+    API -> DB : check owner is not rating own restaurant
+    API -> DB : INSERT posting (kind='review', status='pending')
+    alt duplicate review (unique index)
+      DB --> API : unique violation
+      API --> UI : 409 already reviewed
+    else inserted
+      DB --> API : new posting id
+      API --> UI : 201 pending
+      UI --> Customer : "Submitted — awaiting moderation"
+    end
+  end
+end
+== Moderation ==
+Moderator -> UI : Open /admin moderation queue
+UI -> API : GET /api/admin/data
+API -> Auth : roles('admin','moderator')
+API -> DB : SELECT pending postings
+DB --> UI : queue
+Moderator -> UI : Approve or Reject (with reason)
+UI -> API : PATCH /api/admin/postings/:id
+API -> DB : BEGIN
+API -> DB : verify moderator ≠ author
+API -> DB : UPDATE postings SET status, moderated_by, moderated_at
+API -> DB : INSERT audit_log (action='moderate')
+API -> DB : COMMIT
+API --> UI : 200 updated
+note over DB : Approved reviews now count in\nrestaurant_stats / menu_stats views
+@enduml

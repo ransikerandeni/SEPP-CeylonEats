@@ -1,0 +1,16 @@
+@startuml
+!include common.iuml
+title Ceylon Eats — State Machine: Posting Status
+skinparam state {
+  BackgroundColor #F4F8FF
+  BorderColor #2F5597
+}
+[*] --> Pending : user submits
+Pending --> Approved : independent moderator approves
+Pending --> Rejected : moderator rejects (reason)
+Approved --> Rejected : moderator unpublishes
+Rejected --> Approved : independent moderator re-approves
+Approved : visible publicly\ncounts toward ratings
+Rejected : hidden; reason shown to author\nauthor may rewrite review
+Pending : hidden from public
+@enduml

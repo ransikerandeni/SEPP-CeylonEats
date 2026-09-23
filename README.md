@@ -43,7 +43,7 @@ npm run dev
 
 Open [the customer portal](http://127.0.0.1:5173/) or [the staff dashboard](http://127.0.0.1:5173/admin). The API runs on `127.0.0.1:3001`. Seeding is idempotent: it skips existing sample data rather than overwriting edits. Do not run it against a production database.
 
-If this workspace was set up by Codex, `.env` already contains a generated seed password and `.local/ACCESS.md` contains the local sign-in details. Both files are ignored by Git.
+`.env` already contains a generated seed password and `.local/ACCESS.md` contains the local sign-in details. Both files are ignored by Git.
 
 | Account                   | Email                       | Access                                              |
 | ------------------------- | --------------------------- | --------------------------------------------------- |

@@ -1,0 +1,63 @@
+@startuml
+!include common.iuml
+title Ceylon Eats — Use Case Diagram
+left to right direction
+skinparam usecase {
+  BackgroundColor #FFF7E6
+  BorderColor #C77700
+}
+skinparam packageStyle rectangle
+actor "Guest Visitor" as Guest
+actor "Customer" as Cust
+actor "Restaurant\nRepresentative" as Owner
+actor "Moderator" as Mod
+actor "Administrator" as Admin
+
+rectangle "Ceylon Eats Portal" {
+  package "Discovery (public)" {
+    usecase "Search restaurants & dishes\n(EN / SI / TA)" as UC1
+    usecase "Filter by city, category,\ndiet, spice, price band" as UC2
+    usecase "Sort results" as UC3
+    usecase "View restaurant details,\nmenu & ratings" as UC4
+    usecase "Register account" as UC5
+    usecase "Sign in / Sign out" as UC6
+  }
+  package "Community (signed in)" {
+    usecase "Submit rated review\n(optionally for a dish)" as UC7
+    usecase "Comment on approved review" as UC8
+    usecase "Track my contributions\n& rejection reasons" as UC9
+    usecase "Post company response" as UC10
+    usecase "Verify restaurant ownership" as UC10a
+  }
+  package "Staff dashboard (/admin)" {
+    usecase "Moderate postings\n(approve / reject / unpublish)" as UC11
+    usecase "Give rejection reason" as UC11a
+    usecase "Manage restaurants\n(create / update / assign owner)" as UC12
+    usecase "Manage menu items\n(price, diet, names, image)" as UC13
+    usecase "Record audit log entry" as UC14
+  }
+}
+Guest -- UC1
+Guest -- UC2
+Guest -- UC3
+Guest -- UC4
+Guest -- UC5
+Guest -- UC6
+Cust -- UC7
+Cust -- UC8
+Cust -- UC9
+Owner -- UC10
+UC11 -- Mod
+UC12 -- Admin
+UC13 -- Admin
+UC10 -- Admin
+Cust -up-|> Guest
+Owner -up-|> Cust
+Admin -up-|> Mod
+UC2 .> UC1 : <<extend>>
+UC10 .> UC10a : <<include>>
+UC11a .> UC11 : <<extend>>
+UC11 .> UC14 : <<include>>
+UC12 .> UC14 : <<include>>
+UC13 .> UC14 : <<include>>
+@enduml

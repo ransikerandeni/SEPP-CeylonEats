@@ -1,0 +1,48 @@
+@startuml
+!include common.iuml
+title Ceylon Eats — Activity Diagram: Posting Publication Workflow
+skinparam activity {
+  BackgroundColor #FFF7E6
+  BorderColor #C77700
+}
+|Customer / Representative|
+start
+:Sign in;
+:Write review, comment or response;
+|System|
+:Validate input & permissions;
+if (Valid and permitted?) then (no)
+  :Show error;
+  stop
+else (yes)
+endif
+:Save posting as **Pending**;
+:Show "awaiting moderation";
+|Moderator|
+:Open moderation queue;
+:Review posting;
+if (Moderator is the author?) then (yes)
+  :Blocked — another\nstaff member must decide;
+  stop
+else (no)
+endif
+if (Acceptable?) then (approve)
+  |System|
+  if (Reply with unpublished parent?) then (yes)
+    :Refuse approval;
+    stop
+  else (no)
+  endif
+  :Set status **Approved**;
+  :Recalculate ratings via views;
+else (reject)
+  |Moderator|
+  :Enter reason (≥ 5 chars);
+  |System|
+  :Set status **Rejected**;
+  :Author sees reason in\n"My contributions";
+endif
+|System|
+:Write audit log entry;
+stop
+@enduml

@@ -1,0 +1,22 @@
+digraph DFD0 {
+  graph [rankdir=LR, fontname=Helvetica, labelloc=t, fontsize=20, label="Ceylon Eats — DFD Level 0 (Context Diagram)\n ", pad=0.4, nodesep=0.7, ranksep=1.6, dpi=150];
+  node [fontname=Helvetica, fontsize=12];
+  edge [fontname=Helvetica, fontsize=10, color="#444444"];
+  node [shape=box, style=filled, fillcolor="#DCE6F7", color="#2F5597", width=1.8, height=0.8];
+  Guest [label="Guest Visitor"]; Cust [label="Customer"]; Owner [label="Restaurant\nRepresentative"];
+  Mod [label="Moderator"]; Admin [label="Administrator"];
+  node [shape=circle, style=filled, fillcolor="#FFF1D6", color="#C77700", width=2.6, fixedsize=true, fontsize=14];
+  P0 [label="0\n\nCeylon Eats\nReview Portal"];
+  {rank=same; Guest; Cust; Owner}
+  {rank=same; Mod; Admin}
+  Guest -> P0 [label="search terms, filters,\nregistration details"];
+  P0 -> Guest [label="restaurant & dish listings,\nmenus, prices, ratings"];
+  Cust -> P0 [label="credentials, reviews,\nratings, comments"];
+  P0 -> Cust [label="session, submission status,\nrejection reasons"];
+  Owner -> P0 [label="company responses"];
+  P0 -> Owner [label="approved reviews of\nassigned restaurants"];
+  P0 -> Mod [label="moderation queue"];
+  Mod -> P0 [label="approve / reject\ndecisions + reasons"];
+  Admin -> P0 [label="restaurant & menu data,\nprices, owner assignment"];
+  P0 -> Admin [label="catalog data,\nconfirmation"];
+}
