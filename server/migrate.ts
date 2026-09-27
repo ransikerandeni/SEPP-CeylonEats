@@ -1,5 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { pool, transaction } from './db';
+import { pool, transaction } from './db.js';
 const directory = new URL('./migrations/', import.meta.url);
 export async function migrate() {
   const files = (await readdir(directory)).filter((name) => name.endsWith('.sql')).sort();

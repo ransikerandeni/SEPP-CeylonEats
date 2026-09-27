@@ -1,6 +1,6 @@
 import { randomBytes, createHash } from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
-import { query } from './db';
+import { query } from './db.js';
 export type User = {
   id: number;
   name: string;

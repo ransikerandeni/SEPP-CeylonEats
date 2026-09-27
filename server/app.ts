@@ -5,8 +5,8 @@ import { rateLimit } from 'express-rate-limit';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import path from 'node:path';
-import { query, transaction } from './db';
-import { loadUser, requireUser, roles, setSession, clearSession, hash } from './auth';
+import { query, transaction } from './db.js';
+import { loadUser, requireUser, roles, setSession, clearSession, hash } from './auth.js';
 import {
   restaurantSchema,
   menuSchema,
@@ -16,10 +16,12 @@ import {
   loginSchema,
   moderationSchema,
   filtersSchema,
-} from './validation';
+} from './validation.js';
 
 export const app = express();
 app.disable('x-powered-by');
+// Behind Vercel's proxy, so rate limiting keys on the real client address.
+app.set('trust proxy', 1);
 app.use(
   helmet({
     contentSecurityPolicy: {

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { sampleImage } from './images';
-import { pool, transaction } from './db';
-import { migrate } from './migrate';
+import { sampleImage } from './images.js';
+import { pool, transaction } from './db.js';
+import { migrate } from './migrate.js';
 export async function seed(password: string) {
   if (password.length < 12 || Buffer.byteLength(password, 'utf8') > 72)
     throw new Error('Set SEED_PASSWORD to a private password of 12–72 ASCII characters.');

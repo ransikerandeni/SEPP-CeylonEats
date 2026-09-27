@@ -1,5 +1,5 @@
-import { pool, transaction } from './db';
-import { sampleImages } from './images';
+import { pool, transaction } from './db.js';
+import { sampleImages } from './images.js';
 // Opt-in migration for the original fictional catalog; preserve custom image edits.
 const originalImages = [
   'https://images.unsplash.com/photo-1743674453123-93356ade2891?auto=format&fit=crop&w=1000&q=85',

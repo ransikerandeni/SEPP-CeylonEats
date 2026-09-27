@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { app } from './app';
-import { pool } from './db';
+import { app } from './app.js';
+import { pool } from './db.js';
 const port = Number(process.env.PORT || 3001);
 await pool.query('SELECT 1');
 const server = app.listen(port, '127.0.0.1', () =>
