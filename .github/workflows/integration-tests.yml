@@ -1,0 +1,61 @@
+name: Integration tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: integration-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node-test:
+    name: Unit, component and API integration suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # The suite talks to a real database: it creates a uniquely named schema,
+    # seeds it, asserts over HTTP, then drops only that schema.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: ceylon
+          POSTGRES_PASSWORD: local_dev_only
+          POSTGRES_DB: ceylon_eats
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://ceylon:local_dev_only@127.0.0.1:5432/ceylon_eats
+      APP_ORIGIN: http://127.0.0.1:5173
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12'
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Runs every Vitest project (unit, component, integration) so coverage
+      # reflects the whole pyramid below end-to-end, and fails under the floor.
+      - name: Run the test suite with coverage
+        run: npm run test:coverage
+
+      - name: Upload the coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14

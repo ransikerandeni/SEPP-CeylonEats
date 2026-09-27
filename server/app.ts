@@ -32,11 +32,17 @@ app.use(
 );
 app.use(express.json({ limit: '32kb' }), cookieParser());
 const tooMany = { error: 'Too many requests. Please wait a moment and try again.' };
+/**
+ * A browser test run drives hundreds of page loads a minute from one address,
+ * so the suite raises these budgets. Leave them unset in any real deployment:
+ * the defaults below are the production values.
+ */
+const budget = (name: string, fallback: number) => Number(process.env[name] || fallback);
 app.use(
   '/api',
   rateLimit({
     windowMs: 60000,
-    limit: 300,
+    limit: budget('API_RATE_LIMIT', 300),
     message: tooMany,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
@@ -57,7 +63,7 @@ app.use(
 );
 const authLimit = rateLimit({
   windowMs: 15 * 60000,
-  limit: 30,
+  limit: budget('AUTH_RATE_LIMIT', 30),
   message: tooMany,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
@@ -65,7 +71,7 @@ const authLimit = rateLimit({
 // Refusing a duplicate address makes registration enumerable, so keep the budget tight.
 const registerLimit = rateLimit({
   windowMs: 60 * 60000,
-  limit: 5,
+  limit: budget('REGISTER_RATE_LIMIT', 5),
   message: tooMany,
   standardHeaders: 'draft-8',
   legacyHeaders: false,

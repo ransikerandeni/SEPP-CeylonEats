@@ -1,0 +1,37 @@
+name: Static verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: static-verification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck-and-build:
+    name: Type check, build and formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12'
+          cache: 'npm'
+
+      - run: npm ci
+
+      # `build` runs `tsc --noEmit` first, which type checks the application,
+      # the server, and both test suites before Vite bundles the client.
+      - name: Type check and build
+        run: npm run build
+
+      - name: Check formatting
+        run: npm run format:check
+
+      # Unit and component tests need no database, so they run here for fast feedback.
+      - name: Unit and component tests
+        run: npm run test:unit
