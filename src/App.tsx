@@ -99,8 +99,8 @@ export default function App() {
                   </button>
                 </>
               ) : (
-                <Link className="button small" to="/account">
-                  Sign in <ArrowUpRight size={16} />
+                <Link className="button small outline" to="/account">
+                  Sign in
                 </Link>
               )}
             </div>
@@ -135,8 +135,8 @@ export default function App() {
             {appName}.
           </Link>
           <span>Colombo · Kandy · Galle</span>
-          <Link to="/photo-credits">Photo credits</Link>
-          <span>Prototype · Sample venues, prices & reviews</span>
+          {/* <Link to="/photo-credits">Photo credits</Link> */}
+          {/* <span>Prototype · Sample venues, prices & reviews</span> */}
         </footer>
       </AuthContext.Provider>
     </Suspense>

@@ -3,24 +3,36 @@ import { Link, useSearchParams } from 'react-router-dom';
 import {
   Search,
   MapPin,
+  ArrowRight,
   ArrowUpRight,
   SlidersHorizontal,
-  Utensils,
+  UtensilsCrossed,
   Soup,
-  Flame,
+  EggFried,
+  Triangle,
+  TreePalm,
   Sandwich,
   Fish,
   CookingPot,
-  Wheat,
-  Beef,
+  Flower2,
   Leaf,
   ShieldCheck,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import { api, money, spiceNames } from './api';
 import type { Category, Dish, Restaurant } from './types';
 import { DietTags, FoodImage, Message, Rating } from './components';
-const categoryIcons = [Soup, Flame, Sandwich, CookingPot, Fish, Wheat, CookingPot, Beef];
+const categoryIcons: Record<string, LucideIcon> = {
+  'rice-curry': CookingPot,
+  'kottu-hoppers': EggFried,
+  'short-eats': Triangle,
+  'jaffna-cuisine': TreePalm,
+  seafood: Fish,
+  chinese: Soup,
+  indian: Flower2,
+  western: Sandwich,
+};
 const heroImage = '/images/village-rice-curry.jpg';
 export default function Explore() {
   const [params, setParams] = useSearchParams();
@@ -77,23 +89,26 @@ export default function Explore() {
             <span className="tiny-line" />A little local. A lot to discover.
           </span>
           <h1>
-            Good food.
-            <br />
-            <em>Great discoveries.</em>
+            <span className="hero-line">Good food.</span>
+            <span className="hero-line">Great discoveries.</span>
           </h1>
           <p>
             Your next favourite table is closer than you think.
             <br className="desktop" /> Explore local flavours, one honest review at a time.
           </p>
           <div className="city-line">
-            <MapPin size={15} /> Colombo <span>·</span> Kandy <span>·</span> Galle
+            Colombo <span aria-hidden="true">·</span> Kandy <span aria-hidden="true">·</span> Galle
           </div>
         </div>
         <div className="banner-photo">
           <FoodImage src={heroImage} alt="A colourful Sri Lankan rice and curry meal" />
           <div className="photo-caption">
-            <span>Savour the island</span>
-            <strong>Made of many flavours.</strong>
+            <TreePalm aria-hidden="true" />
+            <span>
+              Savour
+              <br />
+              the island
+            </span>
           </div>
         </div>
       </section>
@@ -125,7 +140,7 @@ export default function Explore() {
             ))}
           </select>
           <button className="button" type="submit">
-            Find my flavour <Search size={17} />
+            Find my flavour <ArrowRight size={18} />
           </button>
         </form>
         <p className="search-note">Search in English, සිංහල or தமிழ்</p>
@@ -135,11 +150,11 @@ export default function Explore() {
           className={!params.get('category') ? 'selected' : ''}
           onClick={() => change('category', '')}
         >
-          <Utensils />
+          <UtensilsCrossed />
           <span>All flavours</span>
         </button>
-        {categories.map((c, i) => {
-          const Icon = categoryIcons[i] || Utensils;
+        {categories.map((c) => {
+          const Icon = categoryIcons[c.slug] || UtensilsCrossed;
           return (
             <button
               key={c.id}
@@ -155,9 +170,7 @@ export default function Explore() {
       <section className="results-layout">
         <aside className={filtersOpen ? 'filters mobile-open' : 'filters'}>
           <div className="filter-title">
-            <h2>
-              <SlidersHorizontal size={18} /> Make it yours
-            </h2>
+            <h2>Make it yours</h2>
             <button
               onClick={() => {
                 setParams(
@@ -270,7 +283,7 @@ export default function Explore() {
               </button>
             </div>
             <label className="sort-label">
-              Sort by{' '}
+              <span className="sr-only">Sort by</span>
               <select
                 aria-label="Sort results"
                 value={params.get('sort') || 'recommended'}
@@ -334,12 +347,12 @@ function RestaurantCard({ restaurant: r }: { restaurant: Restaurant }) {
     <Link className="restaurant-card" to={`/restaurants/${r.id}`}>
       <div className="card-image">
         <FoodImage src={r.image_url} alt={`Illustrative dining photograph for ${r.name}`} />
-        <span className="city-badge">
-          <MapPin size={12} />
-          {r.city}
-        </span>
       </div>
       <div className="card-body">
+        <p className="card-city">
+          <MapPin size={13} />
+          {r.city}
+        </p>
         <div className="card-title-row">
           <h3>{r.name}</h3>
           <Rating value={r.rating} />
@@ -347,6 +360,7 @@ function RestaurantCard({ restaurant: r }: { restaurant: Restaurant }) {
         <p className="card-categories">
           {r.categories?.slice(0, 2).join(' · ') || 'Menu coming soon'}
         </p>
+        <p className="card-price">{priceRange(r)}</p>
         <p className="card-description">{r.description}</p>
         <div className="card-bottom">
           <span>
@@ -360,6 +374,11 @@ function RestaurantCard({ restaurant: r }: { restaurant: Restaurant }) {
       </div>
     </Link>
   );
+}
+function priceRange({ min_price, max_price }: Restaurant) {
+  if (min_price === null || max_price === null) return money(null);
+  if (Number(min_price) === Number(max_price)) return money(min_price);
+  return `${money(min_price)} – ${money(max_price).replace(/^LKR\s*/, '')}`;
 }
 function DishCard({ dish: d }: { dish: Dish }) {
   return (
